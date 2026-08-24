@@ -16,29 +16,22 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '17'
 
-      - name: Install Cordova
+      - name: Install Cordova & Build App
         run: |
           npm install -g cordova
-
-      - name: Create Cordova Project & Add Platform
-        run: |
           cordova create appcom com.gokce.namaz VAKIT
           cd appcom
           rm -rf www/*
           cp ../index.html www/
-          cordova platform add android@10.1.2
-
-      - name: Build APK
-        run: |
-          cd appcom
+          cordova platform add android
           cordova build android --debug
 
       - name: Upload APK Artifact
