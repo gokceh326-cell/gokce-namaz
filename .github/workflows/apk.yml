@@ -16,39 +16,33 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '11'
 
-      - name: Prepare Web Directory
+      - name: Install Cordova
         run: |
-          mkdir www
-          cp index.html www/
+          npm install -g cordova
 
-      - name: Install Capacitor & Build App
+      - name: Create Cordova Project & Add Platform
         run: |
-          echo '{"name": "vakit-app", "version": "1.0.0"}' > package.json
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init VAKIT com.gokce.namaz --web-dir www
-          npx cap add android
-          npx cap sync android
+          cordova create appcom com.gokce.namaz VAKIT
+          cd appcom
+          rm -rf www/*
+          cp ../index.html www/
+          cordova platform add android@10.1.2
 
-      - name: Accept Android Licenses
+      - name: Build APK
         run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-
-      - name: Build APK with Gradle
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          cd appcom
+          cordova build android --debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: VAKIT-Namaz-App
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: appcom/platforms/android/app/build/outputs/apk/debug/app-debug.apk
